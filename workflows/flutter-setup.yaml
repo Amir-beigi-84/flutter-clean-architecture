@@ -1,0 +1,71 @@
+name: Flutter Clean Architecture Setup
+
+on:
+  workflow_dispatch:
+    inputs:
+      state_management:
+        description: "State Management"
+        required: true
+        default: "bloc"
+        type: choice
+        options:
+          - bloc
+          - riverpod
+          - provider
+          - getx
+      profile:
+        description: "Dependency Profile"
+        required: true
+        default: "standard"
+        type: choice
+        options:
+          - minimal
+          - standard
+          - full
+      router:
+        description: "Router"
+        required: true
+        default: "none"
+        type: choice
+        options:
+          - none
+          - go_router
+      features:
+        description: "Features (comma-separated)"
+        required: false
+        default: "auth,profile"
+
+jobs:
+  scaffold:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.0"
+          channel: "stable"
+
+      - name: Run Setup Script
+        env:
+          STATE_MGMT: ${{ github.event.inputs.state_management }}
+          PROFILE: ${{ github.event.inputs.profile }}
+          ROUTER: ${{ github.event.inputs.router }}
+          FEATURES: ${{ github.event.inputs.features }}
+          AUTO: "true"
+        run: |
+          chmod +x scripts/setup-unix.sh
+          ./scripts/setup-unix.sh \
+            --state "$STATE_MGMT" \
+            --profile "$PROFILE" \
+            --router "$ROUTER" \
+            --features "$FEATURES" \
+            --auto
+
+      - name: Commit Changes
+        run: |
+          git config user.name "Flutter Clean Bot"
+          git config user.email "bot@flutter-clean.dev"
+          git add .
+          git commit -m "feat: scaffold architecture with ${{ github.event.inputs.state_management }}"
+          git push

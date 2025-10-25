@@ -1,0 +1,46 @@
+
+.PHONY: setup clean test format analyze build-runner install-hooks
+
+# Quick setup with interactive mode
+setup:
+	@chmod +x scripts/setup-unix.sh
+	@./scripts/setup-unix.sh
+
+# Auto setup with defaults
+setup-auto:
+	@chmod +x scripts/setup-unix.sh
+	@./scripts/setup-unix.sh --auto
+
+# Setup with specific configuration
+setup-bloc:
+	@./scripts/setup-unix.sh --state bloc --profile standard --auto
+
+setup-riverpod:
+	@./scripts/setup-unix.sh --state riverpod --profile full --router go_router --auto
+
+# Development commands
+install-hooks:
+	@git config core.hooksPath .githooks
+	@chmod +x .githooks/pre-commit
+	@echo "✅ Git hooks installed"
+
+format:
+	@dart format lib/
+
+analyze:
+	@dart analyze
+
+test:
+	@flutter test
+
+build-runner:
+	@dart run build_runner build --delete-conflicting-outputs
+
+# Clean generated files
+clean:
+	@rm -rf .dart_tool build
+	@flutter clean
+
+# Full workflow
+dev: install-hooks format analyze test
+	@echo "✅ Development environment ready"

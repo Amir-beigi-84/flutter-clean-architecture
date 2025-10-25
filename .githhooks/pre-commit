@@ -1,0 +1,28 @@
+
+#!/usr/bin/env bash
+# Auto-format and validate before commit
+
+echo "Running pre-commit checks..."
+
+# Format Dart code
+dart format lib/ --set-exit-if-changed || {
+  echo "❌ Code not formatted. Running dart format..."
+  dart format lib/
+  exit 1
+}
+
+# Analyze
+dart analyze || {
+  echo "❌ Analysis failed"
+  exit 1
+}
+
+# Run tests if they exist
+if [[ -d test ]] && ls test/*.dart 1> /dev/null 2>&1; then
+  flutter test || {
+    echo "❌ Tests failed"
+    exit 1
+  }
+fi
+
+echo "✅ Pre-commit checks passed"
